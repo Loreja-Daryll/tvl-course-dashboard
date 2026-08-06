@@ -1,0 +1,51 @@
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Inter:wght@400;500;600;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-serif: 'Playfair Display', serif;
+  --font-sans: 'Inter', system-ui, sans-serif;
+
+  --color-charcoal: #0A0908;
+  --color-charcoal-soft: #14120F;
+  --color-charcoal-card: #17140F;
+  --color-charcoal-border: #2A2419;
+
+  --color-gold-100: #FFF4C2;
+  --color-gold-300: #FFD86B;
+  --color-gold-500: #E5B842;
+  --color-gold-700: #B8912F;
+
+  --color-cream: #F5F0E6;
+}
+
+@layer base {
+  html {
+    background-color: var(--color-charcoal);
+  }
+  body {
+    margin: 0;
+    background-color: var(--color-charcoal);
+    color: var(--color-cream);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection {
+    background-color: var(--color-gold-500);
+    color: var(--color-charcoal);
+  }
+  /* Slim, gold-tinted scrollbar to match the premium feel */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--color-charcoal);
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--color-charcoal-border);
+    border-radius: 999px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--color-gold-700);
+  }
+}
