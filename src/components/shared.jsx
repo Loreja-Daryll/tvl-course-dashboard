@@ -1,5 +1,7 @@
 /* Small, reusable presentational pieces shared across multiple pages. */
 
+import { useEffect, useRef, useState } from 'react';
+
 export function initialsFrom(name) {
   return name
     .split(' ')
@@ -9,12 +11,19 @@ export function initialsFrom(name) {
     .toUpperCase();
 }
 
-/** Gold circular progress ring, built with pure SVG — no images. */
+/** Gold circular progress ring, built with pure SVG — no images.
+ *  Animates from 0 up to `percent` the first time it enters view. */
 export function CircularProgress({ percent, size = 128, strokeWidth = 10 }) {
+  const [animatedPercent, setAnimatedPercent] = useState(0);
   const radius = (size - strokeWidth) / 2;
   const circumference = 2 * Math.PI * radius;
-  const offset = circumference - (percent / 100) * circumference;
+  const offset = circumference - (animatedPercent / 100) * circumference;
   const gradientId = `progress-gradient-${size}`;
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => setAnimatedPercent(percent));
+    return () => cancelAnimationFrame(raf);
+  }, [percent]);
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -43,12 +52,48 @@ export function CircularProgress({ percent, size = 128, strokeWidth = 10 }) {
           strokeDasharray={circumference}
           strokeDashoffset={offset}
           strokeLinecap="round"
-          className="transition-[stroke-dashoffset] duration-700 ease-out"
+          className="transition-[stroke-dashoffset] duration-[1200ms] ease-out"
         />
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="font-serif text-2xl font-semibold text-cream">{percent}%</span>
+        <span className="font-serif text-2xl font-semibold text-cream">{animatedPercent}%</span>
       </div>
+    </div>
+  );
+}
+
+/** Horizontal gradient progress bar that fills from 0 to `percent` on mount
+ *  (or whenever it scrolls into view), instead of snapping to its final
+ *  width immediately. Used for lesson bars, module bars, course cards. */
+export function AnimatedBar({ percent, className = '', trackClassName = '' }) {
+  const [width, setWidth] = useState(0);
+  const ref = useRef(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          requestAnimationFrame(() => setWidth(percent));
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.2 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [percent]);
+
+  return (
+    <div
+      ref={ref}
+      className={`h-1.5 w-full overflow-hidden rounded-full bg-charcoal-border/70 ${trackClassName}`}
+    >
+      <div
+        className={`h-full rounded-full bg-gradient-to-r from-gold-500 to-gold-300 transition-[width] duration-[900ms] ease-out ${className}`}
+        style={{ width: `${width}%` }}
+      />
     </div>
   );
 }
